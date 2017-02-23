@@ -1,0 +1,9 @@
+setuptools == 7.0
+pycrypto
+pyramid
+pytz
+webob
+webtest
+coverage
+python-coveralls
+nose
