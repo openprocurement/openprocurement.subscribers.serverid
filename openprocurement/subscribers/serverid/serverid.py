@@ -9,6 +9,7 @@ from webob.exc import HTTPPreconditionFailed
 from logging import getLogger
 from datetime import datetime
 from pytz import timezone
+from hashlib import md5
 
 TZ = timezone(environ['TZ'] if 'TZ' in environ else 'Europe/Kiev')
 
@@ -36,7 +37,7 @@ def decrypt(sid, key):
 
 def server_id_validator(event):
     request = event.request
-    server_id = event.request.registry.server_id
+    server_id = event.request.registry.couchdb_server_id
     cookies = SimpleCookie(request.environ.get('HTTP_COOKIE'))
     cookie_server_id = cookies.get('SERVER_ID', None)
     if cookie_server_id:
@@ -82,9 +83,13 @@ def server_id_validator(event):
 
 def includeme(config):
     logger.info('init server_id NewRequest subscriber')
+
     if config.registry.server_id == '':
-        config.registry.server_id = uuid.uuid4().hex
+        config.registry.couchdb_server_id = uuid.uuid4().hex
         logger.warning('\'server_id\' is empty. Used generated \'server_id\' {}'.format(
             config.registry.server_id
         ))
+    else:
+        config.registry.couchdb_server_id = md5(config.registry.server_id).hexdigest()
     config.add_subscriber(server_id_validator, NewRequest)
+
