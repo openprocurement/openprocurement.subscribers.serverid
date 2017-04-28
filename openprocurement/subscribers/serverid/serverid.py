@@ -59,8 +59,6 @@ def server_id_validator(event):
             raise request.response
         else:
             time = decrypted[len(server_id):]
-            logger.debug('Valid cookie: {} ({})'.format(value, time),
-                         extra={'MESSAGE_ID': 'serverid_valid'})
     elif request.method in ['POST', 'PATCH', 'PUT', 'DELETE']:
         value, time = encrypt(server_id)
         response_cookie = SimpleCookie()
