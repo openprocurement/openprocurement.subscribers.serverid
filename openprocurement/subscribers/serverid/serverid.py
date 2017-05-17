@@ -74,7 +74,7 @@ def server_id_validator(event):
     if not cookie_server_id:
         value, time = encrypt(server_id)
         request.response.set_cookie(name='SERVER_ID', value=value)
-        logger.info('New cookie: {} ({})'.format(value, time),
+        logger.debug('New cookie: {} ({})'.format(value, time),
                     extra={'MESSAGE_ID': 'serverid_new'})
         return request.response
 
