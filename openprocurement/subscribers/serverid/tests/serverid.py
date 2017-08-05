@@ -40,13 +40,13 @@ def status_500(request):
 def error_404(request):
     resp = HTTPNotFound(content_type='application/json')
     resp.empty_body = True
-    return resp
+    raise resp
 
 
 def error_500(request):
     resp = HTTPInternalServerError(content_type='application/json')
     resp.empty_body = True
-    return resp
+    raise resp
 
 
 class SubscriberTest(unittest.TestCase):
