@@ -35,6 +35,14 @@ def decrypt(sid, key):
     return text
 
 
+def server_id_callback(request, response):
+    server_id = request.registry.couchdb_server_id
+    value, time = encrypt(server_id)
+    response.set_cookie(name='SERVER_ID', value=value)
+    logger.debug('New cookie: {} ({})'.format(value, time),
+                 extra={'MESSAGE_ID': 'serverid_new'})
+
+
 def server_id_validator(event):
     request = event.request
     server_id = event.request.registry.couchdb_server_id
@@ -72,10 +80,7 @@ def server_id_validator(event):
                     extra={'MESSAGE_ID': 'serverid_new'})
         raise request.response
     if not cookie_server_id:
-        value, time = encrypt(server_id)
-        request.response.set_cookie(name='SERVER_ID', value=value)
-        logger.debug('New cookie: {} ({})'.format(value, time),
-                    extra={'MESSAGE_ID': 'serverid_new'})
+        request.add_response_callback(server_id_callback)
         return request.response
 
 
@@ -85,9 +90,8 @@ def includeme(config):
     if config.registry.server_id == '':
         config.registry.couchdb_server_id = uuid.uuid4().hex
         logger.warning('\'server_id\' is empty. Used generated \'server_id\' {}'.format(
-            config.registry.server_id
+            config.registry.couchdb_server_id
         ))
     else:
         config.registry.couchdb_server_id = md5(config.registry.server_id).hexdigest()
     config.add_subscriber(server_id_validator, NewRequest)
-
